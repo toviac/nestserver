@@ -3,12 +3,34 @@ import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway()
 export class EventsGateway {
+  @WebSocketServer()
+  server: Server;
+
+  handleConnection(client: any) {
+    console.log('connected: ', client.id);
+  }
+
+  handleDisconnect(client: any) {
+    console.log('disconnected: ', client.id);
+  }
+
+  @SubscribeMessage('createRoom')
+  createRoom(
+    @MessageBody() data: any,
+    @ConnectedSocket() socket: Socket,
+  ): WsResponse<unknown> {
+    socket.join('aRoom');
+    socket.to('aRoom').emit('roomCreated', { room: 'aRoom' });
+    return { event: 'roomCreated', data: 'aRoom' };
+  }
+
   @SubscribeMessage('message')
   handleMessage(
     @MessageBody() data: any,
