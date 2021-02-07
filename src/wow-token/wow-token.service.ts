@@ -18,7 +18,8 @@ export class WowTokenService {
           createTime: 1,
         },
       )
-      .sort({ _id: 1 });
+      .sort({ _id: 1 })
+      .lean();
   }
 
   async create(CreateWowTokenDto: CreateWowTokenDto): Promise<any> {

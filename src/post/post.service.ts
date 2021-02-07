@@ -8,6 +8,9 @@ export class PostService {
   constructor(@InjectModel('Post') private postModel: Model<PostDocument>) {}
 
   async findAll(): Promise<Post[]> {
+    // 不加 lean 查出来的是 Mongoose 文档，
+    // 加 lean 查询出来的文档是普通的 JavaScript 对象，
+    // 从而没有 save 方法，没有 getters 和 setters，因此会有更高的性能。
     return this.postModel
       .find(
         {},
@@ -18,10 +21,11 @@ export class PostService {
           updateTime: 1,
         },
       )
-      .sort({ _id: -1 });
+      .sort({ _id: -1 })
+      .lean();
   }
   async findOne(postId: string): Promise<any> {
     const id = Types.ObjectId(postId);
-    return this.postModel.find({ _id: id });
+    return this.postModel.findOne({ _id: id });
   }
 }
