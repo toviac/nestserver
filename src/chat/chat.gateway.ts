@@ -9,7 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway()
-export class ChatRoomGateway {
+export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
