@@ -8,6 +8,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { WowTokenModule } from './wow-token/wow-token.module';
 import { TaskModule } from './tasks/tasks.module';
 import { ChatModule } from './chat/chat.module';
+import { DrawModule } from './draw-something/draw.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ChatModule } from './chat/chat.module';
     TaskModule,
     WowTokenModule,
     ChatModule,
+    DrawModule,
   ],
   controllers: [AppController],
   providers: [AppService],
