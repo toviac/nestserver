@@ -1,9 +1,10 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, MessageBody, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ChatGateway } from '../chat/chat.gateway';
 
 @WebSocketGateway({ namespace: 'draw' })
-export class DrawGateway {
-  constructor() {
+export class DrawGateway extends ChatGateway {
+  super() {
     this.defaultRoom = 'public';
     this.keyList = ['Monkey', 'Dog', 'Bear', 'Flower', 'Girl'];
     this.key = '';
@@ -17,10 +18,6 @@ export class DrawGateway {
   curPlayerIndex: number;
   keyList: string[];
   key: string;
-
-  handleConnection(client: Socket) {
-    client.join(this.defaultRoom);
-  }
 
   @SubscribeMessage('start')
   async handleStart(): Promise<any> {
@@ -40,6 +37,9 @@ export class DrawGateway {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+    console.log('draw message: ', data);
+    const { room = this.defaultRoom } = client.handshake.query;
+    this.server.to(room).emit('message', data);
     if (data === this.key) {
       const { userName } = client.handshake.query;
       this.server.to(this.defaultRoom).emit('success', userName);
