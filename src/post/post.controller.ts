@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { PostListInterceptor, PostInterceptor } from './interceptor/post.interceptor';
 import { PostService } from './post.service';
 import { Post } from './schemas/post.schema';
@@ -13,9 +13,9 @@ export class PostController {
   }
 
   @UseInterceptors(PostInterceptor)
-  @Get(':id')
+  @Get()
   // 这里和文档里写的不一样, 用Promise<Post>会报错
-  async findOne(@Param('id') id): Promise<any> {
+  async findOne(@Query('id') id): Promise<any> {
     return this.postService.findOne(id);
   }
 }
