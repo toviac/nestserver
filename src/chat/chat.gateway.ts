@@ -5,11 +5,13 @@ import { Server, Socket } from 'socket.io';
 export class ChatGateway {
   constructor() {
     this.defaultRoom = 'public';
+    this.nameSpace = '';
   }
 
   @WebSocketServer()
   server: Server;
   defaultRoom: string;
+  nameSpace: string;
 
   handleConnection(client: Socket) {
     const { userName, userId, avatar = '', room = this.defaultRoom } = client.handshake.query;

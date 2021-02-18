@@ -7,6 +7,7 @@ export class DrawGateway extends ChatGateway {
   constructor() {
     super();
     this.defaultRoom = 'public';
+    this.nameSpace = 'draw';
     this.keyList = ['Monkey', 'Dog', 'Bear', 'Flower', 'Girl'];
     this.key = '';
     this.curPlayerIndex = 0;
