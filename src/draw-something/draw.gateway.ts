@@ -4,7 +4,8 @@ import { ChatGateway } from '../chat/chat.gateway';
 
 @WebSocketGateway({ namespace: 'draw' })
 export class DrawGateway extends ChatGateway {
-  super() {
+  constructor() {
+    super();
     this.defaultRoom = 'public';
     this.keyList = ['Monkey', 'Dog', 'Bear', 'Flower', 'Girl'];
     this.key = '';
