@@ -5,13 +5,11 @@ import { Server, Socket } from 'socket.io';
 export class ChatGateway {
   constructor() {
     this.defaultRoom = 'public';
-    this.nameSpace = '';
   }
 
   @WebSocketServer()
   server: Server;
   defaultRoom: string;
-  nameSpace: string;
 
   handleConnection(client: Socket) {
     const { userName, userId, avatar = '', room = this.defaultRoom } = client.handshake.query;
@@ -36,9 +34,11 @@ export class ChatGateway {
   async getOnlineList(@ConnectedSocket() client: Socket): Promise<any> {
     const { room } = client.handshake.query;
     // https://stackoverflow.com/a/25028953
-    const clientIds = this.server.sockets.adapter.rooms[`${room}`].sockets;
+    // @type/socket.io里的Server类型判断与实际不符, 这里的server可能是io.of('...')
+    const io: any = this.server;
+    const clientIds = io.adapter.rooms[`${room}`].sockets;
     const res = [...Object.keys(clientIds)].map(key => {
-      const connection = this.server.sockets.connected[key];
+      const connection = io.connected[key];
       const { userId, userName, avatar = '' } = connection.handshake.query;
       return {
         userInfo: {

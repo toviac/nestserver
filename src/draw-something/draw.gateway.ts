@@ -17,6 +17,7 @@ export class DrawGateway extends ChatGateway {
   @WebSocketServer()
   server: Server;
   defaultRoom: string;
+  nameSpace: string;
   curPlayerIndex: number;
   keyList: string[];
   key: string;
@@ -45,7 +46,8 @@ export class DrawGateway extends ChatGateway {
     if (data === this.key) {
       const { userName } = client.handshake.query;
       this.server.to(this.defaultRoom).emit('success', userName);
-      const clientIds = this.server.sockets.adapter.rooms[this.defaultRoom].sockets;
+      const io: any = this.server;
+      const clientIds = io.adapter.rooms[this.defaultRoom].sockets;
       if (this.curPlayerIndex === [...Object.keys(clientIds)].length - 1) {
         this.endGame();
       } else {
