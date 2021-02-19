@@ -65,6 +65,6 @@ export class ChatGateway {
     // message,
     // timestamp: +new Date(),
     const { room = this.defaultRoom } = client.handshake.query;
-    this.server.to(room).emit('message', data);
+    client.to(room).emit('message', data);
   }
 }
