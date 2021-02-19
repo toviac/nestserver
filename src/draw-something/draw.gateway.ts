@@ -43,7 +43,6 @@ export class DrawGateway extends ChatGateway {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
-    console.log('draw message: ', data);
     const { room = this.defaultRoom } = client.handshake.query;
     this.server.to(room).emit('message', data);
     if (data.message === this.key) {
