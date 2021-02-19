@@ -23,19 +23,22 @@ export class DrawGateway extends ChatGateway {
   key: string;
 
   @SubscribeMessage('start')
-  async handleStart(): Promise<any> {
-    this.currentPlayer();
+  async handleStart(@ConnectedSocket() client: Socket): Promise<any> {
+    const { room } = client.handshake.query;
+    this.currentPlayer(room);
     return this.key;
   }
 
   @SubscribeMessage('drawing')
-  async handleDrawing(@MessageBody() data: any): Promise<any> {
-    this.server.to(this.defaultRoom).emit('drawing', data);
+  async handleDrawing(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+    const { room } = client.handshake.query;
+    this.server.to(room).emit('drawing', data);
   }
 
   @SubscribeMessage('clear')
-  async handleClear() {
-    this.server.to(this.defaultRoom).emit('clear');
+  async handleClear(@ConnectedSocket() client: Socket) {
+    const { room } = client.handshake.query;
+    this.server.to(room).emit('clear');
   }
 
   @SubscribeMessage('message')
@@ -43,13 +46,13 @@ export class DrawGateway extends ChatGateway {
     console.log('draw message: ', data);
     const { room = this.defaultRoom } = client.handshake.query;
     this.server.to(room).emit('message', data);
-    if (data === this.key) {
+    if (data.message === this.key) {
       const { userName } = client.handshake.query;
-      this.server.to(this.defaultRoom).emit('success', userName);
+      this.server.to(room).emit('success', userName);
       const io: any = this.server;
-      const clientIds = io.adapter.rooms[this.defaultRoom].sockets;
+      const clientIds = io.adapter.rooms[room].sockets;
       if (this.curPlayerIndex === [...Object.keys(clientIds)].length - 1) {
-        this.endGame();
+        this.endGame(room);
       } else {
         this.curPlayerIndex++;
       }
@@ -65,14 +68,15 @@ export class DrawGateway extends ChatGateway {
     this.key = this.keyList[keyIndex];
   }
 
-  currentPlayer() {
-    const clientIds = this.server.sockets.adapter.rooms[this.defaultRoom].sockets;
+  currentPlayer(room) {
+    const io: any = this.server;
+    const clientIds = io.adapter.rooms[room].sockets;
     const curPlayerId = [...Object.keys(clientIds)][this.curPlayerIndex];
     this.getKey();
     this.server.to(curPlayerId).emit('key', this.key);
   }
 
-  endGame() {
-    this.server.to(this.defaultRoom).emit('end-game');
+  endGame(room) {
+    this.server.to(room).emit('end-game');
   }
 }
