@@ -38,7 +38,7 @@ export class DrawGateway extends ChatGateway {
   @SubscribeMessage('clear')
   async handleClear(@ConnectedSocket() client: Socket) {
     const { room } = client.handshake.query;
-    client.to(room).emit('clear');
+    this.server.to(room).emit('clear');
   }
 
   @SubscribeMessage('message')
