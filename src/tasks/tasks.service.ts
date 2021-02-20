@@ -1,6 +1,7 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { WowTokenService } from '../wow-token/wow-token.service';
+import { WOW_TOKEN_USERNAME, WOW_TOKEN_PWD } from '../../config/config';
 import * as qs from 'qs';
 
 @Injectable()
@@ -10,7 +11,7 @@ export class TasksService {
 
   async getAccessToken() {
     try {
-      // 'curl -u 900143fcccbd4eceab3c91fc70a71807:mfAPIY5e3n7UhFUnvKCoi1h3tjmbHHd9 -d grant_type=client_credentials https://www.battlenet.com.cn/oauth/token'
+      // 'curl -u username:password -d grant_type=client_credentials https://www.battlenet.com.cn/oauth/token'
       const { data: tokenRes } = await this.httpService
         .request({
           method: 'POST',
@@ -19,7 +20,7 @@ export class TasksService {
           data: qs.stringify({ grant_type: 'client_credentials' }),
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           // 简单登录授权（Basic Authentication）参数，将以明文方式将登录信息以 Authorization 请求头发送出去。
-          auth: { username: '900143fcccbd4eceab3c91fc70a71807', password: 'mfAPIY5e3n7UhFUnvKCoi1h3tjmbHHd9' },
+          auth: { username: WOW_TOKEN_USERNAME, password: WOW_TOKEN_PWD },
         })
         .toPromise();
       this.accessToken = tokenRes.access_token;

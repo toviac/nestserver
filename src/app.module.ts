@@ -1,5 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { DB_URL } from '../config/config.js';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
@@ -14,7 +15,7 @@ import { DrawModule } from './draw-something/draw.module';
   imports: [
     // 这里的 { useCreateIndex: true } 是为了解决
     // https://mongoosejs.com/docs/deprecations.html#ensure Index()的报错
-    MongooseModule.forRoot('mongodb://manager:main_db_manager@89.208.248.23:27017/main', { useCreateIndex: true }),
+    MongooseModule.forRoot(DB_URL, { useCreateIndex: true }),
     PostModule,
     ScheduleModule.forRoot(),
     TaskModule,
