@@ -44,7 +44,7 @@ export class DrawGateway extends ChatGateway {
   async handleMessage(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
     const { room = this.defaultRoom } = client.handshake.query;
     client.to(room).emit('message', data);
-    if (data.message === this.key) {
+    if (String(data.message).trim() === this.key) {
       const { userName } = client.handshake.query;
       this.server.to(room).emit('won', userName);
       const io: any = this.server;
