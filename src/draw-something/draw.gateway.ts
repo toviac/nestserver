@@ -26,7 +26,6 @@ export class DrawGateway extends ChatGateway {
   async handleStart(@ConnectedSocket() client: Socket): Promise<any> {
     const { room } = client.handshake.query;
     this.currentPlayer(room);
-    return this.key;
   }
 
   @SubscribeMessage('drawing')
@@ -47,14 +46,16 @@ export class DrawGateway extends ChatGateway {
     client.to(room).emit('message', data);
     if (data.message === this.key) {
       const { userName } = client.handshake.query;
-      this.server.to(room).emit('success', userName);
+      this.server.to(room).emit('won', userName);
       const io: any = this.server;
       const clientIds = io.adapter.rooms[room].sockets;
       if (this.curPlayerIndex === [...Object.keys(clientIds)].length - 1) {
-        this.endGame(room);
+        // this.endGame(room);
+        this.curPlayerIndex = 0;
       } else {
         this.curPlayerIndex++;
       }
+      this.currentPlayer(room);
     }
   }
 
@@ -71,7 +72,10 @@ export class DrawGateway extends ChatGateway {
     const io: any = this.server;
     const clientIds = io.adapter.rooms[room].sockets;
     const curPlayerId = [...Object.keys(clientIds)][this.curPlayerIndex];
+    const connection = io.connected[curPlayerId];
+    const { userName } = connection.handshake.query;
     this.getKey();
+    this.server.to(room).emit('game-start', { userName });
     this.server.to(curPlayerId).emit('key', this.key);
   }
 
