@@ -1,6 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, MessageBody, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatGateway } from '../chat/chat.gateway';
+import * as keyList from '../../config/draw.config.js';
 
 @WebSocketGateway({ namespace: 'draw' })
 export class DrawGateway extends ChatGateway {
@@ -8,7 +9,7 @@ export class DrawGateway extends ChatGateway {
     super();
     this.defaultRoom = 'public';
     this.nameSpace = 'draw';
-    this.keyList = ['Monkey', 'Dog', 'Bear', 'Flower', 'Girl'];
+    this.keyList = keyList;
     this.key = '';
     this.curPlayerIndex = 0;
     this.getKey();
@@ -44,7 +45,7 @@ export class DrawGateway extends ChatGateway {
   async handleMessage(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
     const { room = this.defaultRoom } = client.handshake.query;
     client.to(room).emit('message', data);
-    if (String(data.message).toLowerCase().trim() === this.key) {
+    if (String(data.message).toLowerCase().trim() === String(this.key).toLowerCase()) {
       const { userName } = client.handshake.query;
       this.server.to(room).emit('won', userName);
       const io: any = this.server;
@@ -75,8 +76,9 @@ export class DrawGateway extends ChatGateway {
     const connection = io.connected[curPlayerId];
     const { userName } = connection.handshake.query;
     this.getKey();
-    this.server.to(room).emit('game-start', { userName });
     this.server.to(curPlayerId).emit('key', this.key);
+    connection.to(room).emit('key-length', this.key.length);
+    this.server.to(room).emit('game-start', { userName });
   }
 
   endGame(room) {
