@@ -27,7 +27,7 @@ export class ChatGateway {
       id: client.id,
       userInfo: { userId, userName, avatar },
     });
-    console.log('disconnected: ', `${client.id} has leaved room ${room}`);
+    console.log('disconnected: ', `${client.id} has left room ${room}`);
   }
 
   @SubscribeMessage('online-list')
