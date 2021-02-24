@@ -23,7 +23,7 @@ export class ChatGateway {
 
   handleDisconnect(client: any) {
     const { userName, userId, avatar = '', room = this.defaultRoom } = client.handshake.query;
-    this.server.to(room).emit('leave', 'leave', {
+    this.server.to(room).emit('leave', {
       id: client.id,
       userInfo: { userId, userName, avatar },
     });
