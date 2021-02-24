@@ -6,7 +6,10 @@ import * as qs from 'qs';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly wowTokenService: WowTokenService, private readonly httpService: HttpService) {}
+  constructor(private readonly wowTokenService: WowTokenService, private readonly httpService: HttpService) {
+    // execute on startup
+    this.subscribe();
+  }
   private accessToken = '';
 
   async getAccessToken() {
