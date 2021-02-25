@@ -34,11 +34,26 @@ export class DrawGateway extends ChatGateway {
     const { room } = client.handshake.query;
     client.to(room).emit('drawing', data);
   }
+  @SubscribeMessage('drawing-dot')
+  async handleDrawingDot(@MessageBody() data: any, @ConnectedSocket() client: Socket): Promise<any> {
+    const { room } = client.handshake.query;
+    client.to(room).emit('drawing-dot', data);
+  }
 
   @SubscribeMessage('clear')
   async handleClear(@ConnectedSocket() client: Socket) {
     const { room } = client.handshake.query;
     this.server.to(room).emit('clear');
+  }
+  @SubscribeMessage('undo')
+  async handleUndo(@ConnectedSocket() client: Socket) {
+    const { room } = client.handshake.query;
+    this.server.to(room).emit('undo');
+  }
+  @SubscribeMessage('draw-end')
+  async handleDrawEnd(@ConnectedSocket() client: Socket) {
+    const { room } = client.handshake.query;
+    this.server.to(room).emit('draw-end');
   }
 
   @SubscribeMessage('message')
