@@ -10,6 +10,7 @@ export class DrawGateway extends ChatGateway {
     this.defaultRoom = 'public';
     this.nameSpace = 'draw';
     this.keyList = keyList;
+    this.usedKeyList = [];
     this.key = '';
     this.curPlayerIndex = 0;
     this.getKey();
@@ -21,6 +22,7 @@ export class DrawGateway extends ChatGateway {
   nameSpace: string;
   curPlayerIndex: number;
   keyList: string[];
+  usedKeyList: string[];
   key: string;
 
   @SubscribeMessage('start')
@@ -76,12 +78,16 @@ export class DrawGateway extends ChatGateway {
   }
 
   getKey() {
+    if (this.usedKeyList.length === this.keyList.length) {
+      this.usedKeyList = [];
+    }
     const keyIndex = Math.floor(Math.random() * this.keyList.length);
-    if (this.key === this.keyList[keyIndex]) {
+    if (this.key === this.keyList[keyIndex] || this.usedKeyList.includes(this.keyList[keyIndex])) {
       this.getKey();
       return;
     }
     this.key = this.keyList[keyIndex];
+    this.usedKeyList.push(this.key);
   }
 
   currentPlayer(room) {
