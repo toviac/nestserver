@@ -1,5 +1,5 @@
 import { Injectable, HttpService } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+// import { Cron } from '@nestjs/schedule';
 import { WowTokenService } from '../wow-token/wow-token.service';
 import { WOW_TOKEN_USERNAME, WOW_TOKEN_PWD } from '../../config/config';
 import * as qs from 'qs';
@@ -8,7 +8,7 @@ import * as qs from 'qs';
 export class TasksService {
   constructor(private readonly wowTokenService: WowTokenService, private readonly httpService: HttpService) {
     // execute on startup
-    this.subscribe();
+    // this.subscribe();
   }
   private accessToken = '';
 
@@ -58,7 +58,8 @@ export class TasksService {
   }
 
   // subscribe 是真正定时任务执行时被运行的函数
-  @Cron('0 */20 * * * *')
+  // 经典怀旧服时光徽章已下线, 代码仅供保存
+  // @Cron('0 */20 * * * *')
   async subscribe() {
     if (!this.accessToken) {
       await this.getAccessToken();
