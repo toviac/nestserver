@@ -28,6 +28,7 @@
     "@nestjs/platform-socket.io": "^7.6.11",
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/websockets": "^7.6.11",
+    "lodash": "^4.17.21",
     "mongoose": "^5.11.15",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
