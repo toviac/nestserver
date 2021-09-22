@@ -10,6 +10,7 @@ import { WowTokenModule } from './wow-token/wow-token.module';
 import { TaskModule } from './tasks/tasks.module';
 import { ChatModule } from './chat/chat.module';
 import { DrawModule } from './draw-something/draw.module';
+import { LibReservationModule } from './lib-reservation/lib-reservation.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DrawModule } from './draw-something/draw.module';
     WowTokenModule,
     ChatModule,
     DrawModule,
+    LibReservationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
