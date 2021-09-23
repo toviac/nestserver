@@ -16,10 +16,12 @@ export class LibReservationService {
   private memberList = [
     { pid: '20183100958', id: '101739408', pwd: '094917' },
     { pid: '20144100165', id: '100457358', pwd: '870906' },
-    { pid: '20193101556', id: '103535070', pwd: '304112' },
-    { pid: '20193101558', id: '103535068', pwd: '170034' },
+    { pid: '20144100170', id: '100457402', pwd: '106025' },
+    // { pid: '20193101556', id: '103535070', pwd: '304112' },
+    // { pid: '20193101558', id: '103535068', pwd: '170034' },
     { pid: '20209BX0008', id: '105969933', pwd: '190323' },
     { pid: '20163100921', id: '100578981', pwd: '236427' },
+    { pid: '20193101559', id: '103535067', pwd: '020854' },
   ];
   private timeList = [
     { from: '8:30', to: '12:30' },
@@ -38,9 +40,9 @@ export class LibReservationService {
       // 'set-cookie': [ 'ASP.NET_SessionId=emdcqo55t1jlu1jgwxxzkk45; path=/; HttpOnly' ]
       const cookie = headers['set-cookie'][0];
       this.sessionId = cookie.split(';')[0];
-      console.log('SUCCESS_GET_SESSION_ID');
+      console.log(`[${new Date().format()}] SUCCESS_GET_SESSION_ID`);
     } catch (e) {
-      console.log('ERR_GET_SESSION_ID: ', e);
+      console.log(`[${new Date().format()}] ERR_GET_SESSION_ID: `, e);
     }
   }
 
@@ -62,16 +64,15 @@ export class LibReservationService {
           data: formData,
         })
         .toPromise();
-      console.log('SUCCESS_LOGIN');
+      console.log(`[${new Date().format()}] SUCCESS_LOGIN: `, id);
     } catch (e) {
-      console.log('ERR_LOGIN: ', e);
+      console.log(`[${new Date().format()}] ERR_LOGIN: `, e);
     }
   }
 
   async getDeviceList() {
     const today = new Date();
     const nextDate = new Date(today.setDate(today.getDate() + 1));
-    // @ts-ignore
     const formattedDate = nextDate.format('yyyyMMdd');
     const params = {
       dev_order: '',
@@ -96,19 +97,19 @@ export class LibReservationService {
         })
         .toPromise();
       this.room401 = res.data.find(i => i.roomName === '401');
-      console.log('SUCCESS_GET_ROOMS');
+      console.log(`[${new Date().format()}] SUCCESS_GET_ROOMS`);
     } catch (e) {
-      console.log('ERR_GET_DEVICE_LIST: ', e, params);
+      console.log(`[${new Date().format()}] ERR_GET_DEVICE_LIST: `, e);
     }
   }
 
   async reserve({ from, to }) {
     if (!from || !to) return;
+    const sessionId = this.sessionId;
     const memberIdList = this.memberList.map(member => member.id);
     const mb_list = '$' + memberIdList.join(',');
     const today = new Date();
     const nextDate = new Date(today.setDate(today.getDate() + 1));
-    // @ts-ignore
     const formattedDate = nextDate.format('yyyy-MM-dd');
     const params = {
       dialogid: '',
@@ -137,27 +138,32 @@ export class LibReservationService {
       _: `${+new Date()}`,
     };
     try {
-      console.log('RESERVE_START');
+      console.log(`[${new Date().format()}] RESERVE_START: `, 'FROM: ', from, 'TO: ', to);
       const { data: res } = await this.httpService
         .request({
           method: 'GET',
-          headers: { Cookie: this.sessionId },
+          headers: { Cookie: sessionId },
           url: 'http://libzwyy.jlu.edu.cn/ClientWeb/pro/ajax/reserve.aspx',
           params: params,
         })
         .toPromise();
+      console.log(`[${new Date().format()}] SUCCESS_RESERVE: `, 'res: ', res);
       if (!res.data) {
         throw new Error(res.msg);
       }
-      console.log('SUCCESS_RESERVE: ', 'FROM: ', from, 'TO: ', to, 'res: ', res);
     } catch (e) {
-      console.log('ERR_RESERVE: ', e.message);
+      if (/操作成功/.test(e.message)) {
+        console.log(`[${new Date().format()}] RESERVE_SUCCESS: `, '预约成功');
+        return;
+      }
+      console.log(`[${new Date().format()}] ERR_RESERVE: `, e.message);
     }
   }
 
   // 秒 分 时 日 月 星期
   // 每日0点0分0秒
   @Cron('0 0 0 * * *')
+  // @Cron('*/10 * * * * *')
   async subscribe() {
     try {
       await this.getDeviceList();
@@ -167,10 +173,10 @@ export class LibReservationService {
         const curTime = this.timeList[i];
         await this.getSessionId();
         await this.login({ id: curUser.pid, pwd: curUser.pwd });
-        await this.reserve({ from: curTime.from, to: curTime.to });
+        this.reserve({ from: curTime.from, to: curTime.to });
       }
     } catch (e) {
-      console.log('ERR_SUBSCRIBE: ', e);
+      console.log(`[${new Date().format()}] ERR_SUBSCRIBE: `, e);
     }
   }
 }
