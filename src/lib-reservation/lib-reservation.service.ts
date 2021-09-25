@@ -147,15 +147,14 @@ export class LibReservationService {
           params: params,
         })
         .toPromise();
-      console.log(`[${new Date().format()}] SUCCESS_RESERVE: `, 'res: ', res);
+      if (res.msg === '操作成功！') {
+        console.log(`[${new Date().format()}] SUCCESS_RESERVE: `, 'res: ', res);
+        return;
+      }
       if (!res.data) {
         throw new Error(res.msg);
       }
     } catch (e) {
-      if (/操作成功/.test(e.message)) {
-        console.log(`[${new Date().format()}] RESERVE_SUCCESS: `, '预约成功');
-        return;
-      }
       console.log(`[${new Date().format()}] ERR_RESERVE: `, e.message);
     }
   }

@@ -2,7 +2,7 @@ interface Date {
   format(fmt?: string): any;
 }
 
-Date.prototype.format = function (fmt = 'yyyy-MM-dd hh:mm:ss') {
+Date.prototype.format = function (fmt = 'yyyy-MM-dd hh:mm:ss.S') {
   const o = {
     'M+': this.getMonth() + 1, //月份
     'd+': this.getDate(), //日
