@@ -1,11 +1,17 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { LibReservation, LibReservationDocument } from './schemas/lib-reservation.schema';
 import * as qs from 'qs';
 import { shuffle } from 'lodash';
 
 @Injectable()
 export class LibReservationService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    @InjectModel('LibReservation') private libModel: Model<LibReservationDocument>,
+    private readonly httpService: HttpService,
+  ) {}
 
   private sessionId = '';
   private room401 = {
@@ -13,21 +19,27 @@ export class LibReservationService {
     labId: '',
     kindId: '',
   };
-  private memberList = [
-    { pid: '20183100958', id: '101739408', pwd: '094917' },
-    { pid: '20144100165', id: '100457358', pwd: '870906' },
-    { pid: '20144100170', id: '100457402', pwd: '106025' },
-    // { pid: '20193101556', id: '103535070', pwd: '304112' },
-    // { pid: '20193101558', id: '103535068', pwd: '170034' },
-    { pid: '20209BX0008', id: '105969933', pwd: '190323' },
-    { pid: '20163100921', id: '100578981', pwd: '236427' },
-    { pid: '20193101559', id: '103535067', pwd: '020854' },
-  ];
+  private memberList = [];
   private timeList = [
     { from: '8:30', to: '12:30' },
     { from: '13:00', to: '17:00' },
     { from: '18:00', to: '21:30' },
   ];
+
+  async findMemberList(): Promise<LibReservation[]> {
+    return this.libModel
+      .find(
+        {},
+        {
+          pid: 1,
+          id: 1,
+          pwd: 1,
+          name: 1,
+        },
+      )
+      .sort({ pid: -1 })
+      .lean();
+  }
 
   async getSessionId() {
     try {
@@ -162,9 +174,10 @@ export class LibReservationService {
   // 秒 分 时 日 月 星期
   // 每日0点0分0秒
   @Cron('0 0 0 * * *')
-  // @Cron('*/10 * * * * *')
+  // @Cron('0 34 9 * * *')
   async subscribe() {
     try {
+      this.memberList = await this.findMemberList();
       await this.getDeviceList();
       const shuffledList = shuffle(this.memberList);
       for (let i = 0; i < this.timeList.length; i++) {
