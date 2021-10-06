@@ -172,8 +172,8 @@ export class LibReservationService {
   }
 
   // 秒 分 时 日 月 星期
-  // 每日0点0分0秒
-  @Cron('0 0 0 * * *')
+  // 每日8点0分0秒
+  @Cron('0 0 8 * * *')
   // @Cron('0 34 9 * * *')
   async subscribe() {
     try {
