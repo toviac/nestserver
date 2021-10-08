@@ -11,6 +11,7 @@ import { TaskModule } from './tasks/tasks.module';
 import { ChatModule } from './chat/chat.module';
 import { DrawModule } from './draw-something/draw.module';
 import { LibReservationModule } from './lib-reservation/lib-reservation.module';
+import { CompanywxModule } from './companywx/companywx.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { LibReservationModule } from './lib-reservation/lib-reservation.module';
     ChatModule,
     DrawModule,
     LibReservationModule,
+    CompanywxModule,
   ],
   controllers: [AppController],
   providers: [AppService],

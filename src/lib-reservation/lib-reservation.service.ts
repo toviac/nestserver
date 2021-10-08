@@ -51,8 +51,8 @@ export class LibReservationService {
         .toPromise();
       // 'set-cookie': [ 'ASP.NET_SessionId=emdcqo55t1jlu1jgwxxzkk45; path=/; HttpOnly' ]
       const cookie = headers['set-cookie'][0];
-      this.sessionId = cookie.split(';')[0];
       console.log(`[${new Date().format()}] SUCCESS_GET_SESSION_ID`);
+      return cookie.split(';')[0];
     } catch (e) {
       console.log(`[${new Date().format()}] ERR_GET_SESSION_ID: `, e);
     }
@@ -115,9 +115,8 @@ export class LibReservationService {
     }
   }
 
-  async reserve({ from, to }) {
+  async reserve({ from, to, sessionId }) {
     if (!from || !to) return;
-    const sessionId = this.sessionId;
     const memberIdList = this.memberList.map(member => member.id);
     const mb_list = '$' + memberIdList.join(',');
     const today = new Date();
@@ -179,14 +178,33 @@ export class LibReservationService {
     try {
       this.memberList = await this.findMemberList();
       await this.getDeviceList();
-      const shuffledList = shuffle(this.memberList);
+      const shuffledList = shuffle(this.memberList).map((member, index) => ({
+        id: member.pid,
+        pwd: member.pwd,
+        from: this.timeList[index].from,
+        to: this.timeList[index].to,
+        sessionId: '',
+      }));
       for (let i = 0; i < this.timeList.length; i++) {
         const curUser = shuffledList[i];
-        const curTime = this.timeList[i];
-        await this.getSessionId();
+        curUser.sessionId = await this.getSessionId();
         await this.login({ id: curUser.pid, pwd: curUser.pwd });
-        this.reserve({ from: curTime.from, to: curTime.to });
       }
+      Promise.all([this.reserve(shuffledList[0]), this.reserve(shuffledList[1]), this.reserve(shuffledList[2])]);
+      const today = new Date();
+      const nextDate = new Date(today.setDate(today.getDate() + 1));
+      const formattedDate = nextDate.format('yyyy-MM-dd');
+      this.httpService
+        .request({
+          method: 'POST',
+          url: 'http://localhost:7001/api/companywx',
+          data: {
+            date: formattedDate,
+            successTime: [],
+            failedTime: [],
+          },
+        })
+        .toPromise();
     } catch (e) {
       console.log(`[${new Date().format()}] ERR_SUBSCRIBE: `, e);
     }
