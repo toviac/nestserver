@@ -44,8 +44,22 @@ export class CompanywxService {
     const token = await this.getToken();
     const data = {
       toparty: '1',
-      msgtype: 'markdown',
+      // msgtype: 'markdown',
+      msgtype: 'textcard',
       agentid: this.appId,
+      textcard: {
+        title: '自习室预约通知',
+        description: `<div class=\"gray\">${msg.date}</div>${
+          msg.successTime.length
+            ? `<div class=\"normal\">预约成功: </div>${msg.successTime
+                .map(time => `<div class=\"highlight\">${time}</div>`)
+                .join(' ')}`
+            : ''
+        }${`<div class=\"normal\">预约失败: </div>${msg.failedTime
+          .map(time => `<div class=\"highlight\">${time}</div>`)
+          .join(' ')}`}`,
+        url: 'http://libzwyy.jlu.edu.cn/ClientWeb/m/ic2/Default.aspx',
+      },
       markdown: {
         content: `### 自习室预约通知\n自习室: <font color=\"comment\">鼎新图书馆401</font>\n日　期: ${msg.date}\n${
           msg.successTime?.length
