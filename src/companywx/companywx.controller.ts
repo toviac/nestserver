@@ -22,13 +22,10 @@ export class CompanywxController {
 
   @Get()
   findAll() {
-    const today = new Date();
-    const nextDate = new Date(today.setDate(today.getDate() + 1));
-    const formattedDate = nextDate.format('yyyy-MM-dd');
     return this.companywxService.sendMsg({
-      date: formattedDate,
-      successTime: ['fasd', 'asdf'],
-      failedTime: ['afsd', 'fasdf'],
+      date: '2021-10-09',
+      successTime: ['8:30 - 12:30', '13:00 - 17:00', '18:00 - 21:30'],
+      failedTime: ['8:30 - 12:30', '13:00 - 17:00', '18:00 - 21:30'],
     });
   }
 }

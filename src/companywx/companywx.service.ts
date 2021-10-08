@@ -12,7 +12,7 @@ export class CompanywxService {
 
   private companyId = 'wwec48ba9cc66de9a4';
   private appId = '1000002';
-  private appSecret = 'dLE-8seoo6iVw0aTBuLIqGFxhjpKJJ4hPsQ_8plTaKg';
+  private companySec = 'dLE-8seoo6iVw0aTBuLIqGFxhjpKJJ4hPsQ_8plTaKg';
   private accessToken = '';
 
   async getToken() {
@@ -33,7 +33,7 @@ export class CompanywxService {
     const { data: token } = await this.httpService
       .request({
         method: 'GET',
-        url: `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${this.companyId}&corpsecret=${this.appSecret}`,
+        url: `https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=${this.companyId}&corpsecret=${this.companySec}`,
       })
       .toPromise();
     return token.access_token;
@@ -47,28 +47,23 @@ export class CompanywxService {
       msgtype: 'markdown',
       agentid: this.appId,
       markdown: {
-        content: `自习室预约通知
-          >自习室: <font color=\"comment\">鼎新图书馆401</font> 
-          >日　期: <font color=\"warning\">${msg.date}</font> 
-          ${
-            msg.successTime?.length
-              ? `**预约成功:**\n>时　间: ${msg.successTime
-                  .map(time => `<font color=\"info\">${time}</font>`)
-                  .join('\n')}`
-              : ``
-          },
-          ${
-            msg.failedTime?.length
-              ? `**预约失败:**\n>时　间: ${msg.failedTime
-                  .map(time => `<font color=\"warning\">${time}</font>`)
-                  .join('\n')}`
-              : ``
-          }`,
+        content: `### 自习室预约通知\n自习室: <font color=\"comment\">鼎新图书馆401</font>\n日　期: ${msg.date}\n${
+          msg.successTime?.length
+            ? `**预约成功:**\n时　间: \n${msg.successTime
+                .map(time => `><font color=\"info\">${time}</font>`)
+                .join('\n')}\n\n`
+            : ``
+        }${
+          msg.failedTime?.length
+            ? `**预约失败:**\n时　间: \n${msg.failedTime
+                .map(time => `><font color=\"warning\">${time}</font>`)
+                .join('\n')}`
+            : ``
+        }`,
       },
       enable_duplicate_check: 0,
       duplicate_check_interval: 1800,
     };
-    console.log('contentLength: ', data.markdown.content.length);
     const { data: res } = await this.httpService
       .request({
         method: 'POST',
@@ -78,12 +73,13 @@ export class CompanywxService {
       })
       .toPromise();
     if (res.errmsg === 'ok') {
+      console.log(`[${new Date().format()}] SUCCESS_SEND_MSG: `, msg);
       return {
         message: '发送成功',
         status: 'success',
       };
     }
-    return {
+    throw {
       status: 'failed',
       message: res.errmsg,
     };
