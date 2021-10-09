@@ -12,8 +12,6 @@ export class LibReservationService {
     @InjectModel('LibReservation') private libModel: Model<LibReservationDocument>,
     private readonly httpService: HttpService,
   ) {}
-
-  private sessionId = '';
   private room401 = {
     devId: '',
     labId: '',
@@ -186,8 +184,8 @@ export class LibReservationService {
   }
 
   // 秒 分 时 日 月 星期
-  // 每日8点0分0秒
-  @Cron('0 0 8 * * *')
+  // 每日0点0分0秒
+  @Cron('0 0 0 * * *')
   // @Cron('0 34 9 * * *')
   async subscribe() {
     try {
