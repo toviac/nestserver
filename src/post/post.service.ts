@@ -28,4 +28,11 @@ export class PostService {
     const id = Types.ObjectId(postId);
     return this.postModel.findOne({ _id: id });
   }
+  async create({ title, author, content }): Promise<any> {
+    return this.postModel.create({ title, author, content });
+  }
+  async update({ id: postId, title, author, content }): Promise<any> {
+    const id = Types.ObjectId(postId);
+    return this.postModel.updateOne({ _id: id }, { title, author, content });
+  }
 }
