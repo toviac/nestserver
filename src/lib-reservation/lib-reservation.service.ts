@@ -21,7 +21,7 @@ export class LibReservationService {
   private timeList = [
     { from: '8:30', to: '12:30' },
     { from: '13:00', to: '17:00' },
-    { from: '18:00', to: '21:30' },
+    { from: '17:30', to: '21:30' },
   ];
 
   async findMemberList(): Promise<LibReservation[]> {

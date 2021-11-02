@@ -1,14 +1,14 @@
-import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, UseInterceptors } from '@nestjs/common';
 import { PostListInterceptor, PostInterceptor } from './interceptor/post.interceptor';
 import { PostService } from './post.service';
-import { Post } from './schemas/post.schema';
+import { Post as Article } from './schemas/post.schema';
 
 @Controller('post')
 export class PostController {
   constructor(private postService: PostService) {}
   @UseInterceptors(PostListInterceptor)
   @Get('list')
-  async findAll(): Promise<Post[]> {
+  async findAll(): Promise<Article[]> {
     return this.postService.findAll();
   }
 
@@ -17,5 +17,18 @@ export class PostController {
   // 这里和文档里写的不一样, 用Promise<Post>会报错
   async findOne(@Query('id') id): Promise<any> {
     return this.postService.findOne(id);
+  }
+
+  @Post()
+  async create(@Body('data') data): Promise<any> {
+    const { title, author, content } = data;
+    if (!title || !content) return;
+    return this.postService.create({ title, author, content });
+  }
+  @Put()
+  async update(@Body('data') data): Promise<any> {
+    const { id, title, author, content } = data;
+    if (!title || !content) return;
+    return this.postService.update({ id, title, author, content });
   }
 }
