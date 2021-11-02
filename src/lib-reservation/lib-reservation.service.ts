@@ -219,11 +219,13 @@ export class LibReservationService {
         const failedTime = (resArr.filter(res => res.status === 'rejected') as PromiseRejectedResult[]).map(
           res => res.reason,
         );
-        this.sendCompanyWxMsg({
-          date: formattedDate,
-          successTime,
-          failedTime,
-        });
+        if (failedTime.length) {
+          this.sendCompanyWxMsg({
+            date: formattedDate,
+            successTime,
+            failedTime,
+          });
+        }
       });
     } catch (e) {
       console.log(`[${new Date().format()}] ERR_SUBSCRIBE: `, e);
