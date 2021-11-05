@@ -12,6 +12,8 @@ import { ChatModule } from './chat/chat.module';
 import { DrawModule } from './draw-something/draw.module';
 import { LibReservationModule } from './lib-reservation/lib-reservation.module';
 import { CompanywxModule } from './companywx/companywx.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { CompanywxModule } from './companywx/companywx.module';
     DrawModule,
     LibReservationModule,
     CompanywxModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

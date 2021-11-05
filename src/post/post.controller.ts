@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Put, Query, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, UseInterceptors, UseGuards } from '@nestjs/common';
 import { PostListInterceptor, PostInterceptor } from './interceptor/post.interceptor';
 import { PostService } from './post.service';
 import { Post as Article } from './schemas/post.schema';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('post')
 export class PostController {
@@ -19,12 +20,15 @@ export class PostController {
     return this.postService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body('data') data): Promise<any> {
     const { title, author, content } = data;
     if (!title || !content) return;
     return this.postService.create({ title, author, content });
   }
+
+  @UseGuards(JwtAuthGuard)
   @Put()
   async update(@Body('data') data): Promise<any> {
     const { id, title, author, content } = data;
