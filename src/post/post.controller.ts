@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Put, Query, UseInterceptors, UseGuards } f
 import { PostListInterceptor, PostInterceptor } from './interceptor/post.interceptor';
 import { PostService } from './post.service';
 import { Post as Article } from './schemas/post.schema';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('post')
 export class PostController {
