@@ -22,7 +22,7 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body('data') data): Promise<any> {
+  async create(@Body() data): Promise<any> {
     const { title, author, content } = data;
     if (!title || !content) return;
     return this.postService.create({ title, author, content });
@@ -30,7 +30,7 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Put()
-  async update(@Body('data') data): Promise<any> {
+  async update(@Body() data): Promise<any> {
     const { id, title, author, content } = data;
     if (!title || !content) return;
     return this.postService.update({ id, title, author, content });
