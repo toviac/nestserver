@@ -12,11 +12,12 @@ export class LibReservationService {
     @InjectModel('LibReservation') private libModel: Model<LibReservationDocument>,
     private readonly httpService: HttpService,
   ) {}
-  private room501 = {
+  private roomToReserve = {
     devId: '',
     labId: '',
     kindId: '',
   };
+  private targetRoomName = '501';
   private memberList = [];
   private timeList = [
     { from: '8:30', to: '12:30' },
@@ -106,7 +107,7 @@ export class LibReservationService {
           params: params,
         })
         .toPromise();
-      this.room501 = res.data.find(i => i.roomName === '501');
+      this.roomToReserve = res.data.find(i => i.roomName === this.targetRoomName);
       console.log(`[${new Date().format()}] SUCCESS_GET_ROOMS`);
     } catch (e) {
       console.log(`[${new Date().format()}] ERR_GET_DEVICE_LIST: `, e);
@@ -122,9 +123,9 @@ export class LibReservationService {
     const formattedDate = nextDate.format('yyyy-MM-dd');
     const params = {
       dialogid: '',
-      dev_id: this.room501.devId,
-      lab_id: this.room501.labId,
-      kind_id: this.room501.kindId,
+      dev_id: this.roomToReserve.devId,
+      lab_id: this.roomToReserve.labId,
+      kind_id: this.roomToReserve.kindId,
       room_id: '',
       type: 'dev',
       prop: '',
