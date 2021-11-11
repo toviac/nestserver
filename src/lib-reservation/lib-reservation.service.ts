@@ -19,6 +19,7 @@ export class LibReservationService {
   };
   private targetRoomName = '501';
   private memberList = [];
+  private shuffledList = [];
   private timeList = [
     { from: '8:30', to: '12:30' },
     { from: '13:00', to: '17:00' },
@@ -75,7 +76,7 @@ export class LibReservationService {
           data: formData,
         })
         .toPromise();
-      console.log(`[${new Date().format()}] SUCCESS_LOGIN: `, id);
+      console.log(`[${new Date().format()}] SUCCESS_LOGIN: `, id, sessionId);
     } catch (e) {
       console.log(`[${new Date().format()}] ERR_LOGIN: `, e);
     }
@@ -83,7 +84,8 @@ export class LibReservationService {
 
   async getDeviceList() {
     const today = new Date();
-    const nextDate = new Date(today.setDate(today.getDate() + 1));
+    // 前一天23点执行, 预约第三天
+    const nextDate = new Date(today.setDate(today.getDate() + 2));
     const formattedDate = nextDate.format('yyyyMMdd');
     const params = {
       dev_order: '',
@@ -185,14 +187,12 @@ export class LibReservationService {
   }
 
   // 秒 分 时 日 月 星期
-  // 每日0点0分0秒
-  @Cron('0 0 0 * * *')
-  // @Cron('0 34 9 * * *')
-  async subscribe() {
+  // 每日23点59分0秒
+  @Cron('0 59 23 * * *')
+  async groupLogin() {
     try {
       this.memberList = await this.findMemberList();
-      await this.getDeviceList();
-      const shuffledList = shuffle(this.memberList)
+      this.shuffledList = shuffle(this.memberList)
         .slice(0, 3)
         .map((member, index) => ({
           id: member.pid,
@@ -202,10 +202,21 @@ export class LibReservationService {
           sessionId: '',
         }));
       for (let i = 0; i < this.timeList.length; i++) {
-        const curUser = shuffledList[i];
+        const curUser = this.shuffledList[i];
         curUser.sessionId = await this.getSessionId();
         await this.login(curUser);
       }
+      await this.getDeviceList();
+    } catch (e) {
+      console.log('ERR_GROUP_LOGIN: ', e.message);
+    }
+  }
+
+  // 次日0点0分0秒
+  @Cron('0 0 0 * * *')
+  async subscribe() {
+    try {
+      const shuffledList = this.shuffledList;
       Promise.allSettled([
         this.reserve(shuffledList[0]),
         this.reserve(shuffledList[1]),
