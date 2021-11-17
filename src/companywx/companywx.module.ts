@@ -15,8 +15,11 @@ export class CompanywxModule implements OnModuleInit {
   constructor(private httpService: HttpService) {}
   public onModuleInit() {
     this.httpService.axiosRef.interceptors.response.use(
-      response => response,
+      response => {
+        return response;
+      },
       err => {
+        console.log(`[${new Date().format()}] ERR_RESPONSE, RETRYING...`);
         const config = err.config;
         if (!config) return Promise.reject(err);
         // retry 具体接口配置的重发次数
