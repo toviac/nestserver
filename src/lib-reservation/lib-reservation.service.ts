@@ -17,7 +17,7 @@ export class LibReservationService {
     labId: '',
     kindId: '',
   };
-  private targetRoomName = '401';
+  private targetRoomName = '312';
   private memberList = [];
   private shuffledList = [];
   private timeList = [
