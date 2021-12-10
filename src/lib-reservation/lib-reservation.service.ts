@@ -1,16 +1,18 @@
 import { Injectable, HttpService } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { LibReservation, LibReservationDocument } from './schemas/lib-reservation.schema';
 import * as qs from 'qs';
 import { shuffle } from 'lodash';
+import { CronJob } from 'cron';
 
 @Injectable()
 export class LibReservationService {
   constructor(
     @InjectModel('LibReservation') private libModel: Model<LibReservationDocument>,
     private readonly httpService: HttpService,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
   private roomToReserve = {
     devId: '',
@@ -25,6 +27,25 @@ export class LibReservationService {
     { from: '13:00', to: '17:00' },
     { from: '17:30', to: '21:30' },
   ];
+
+  async getTimeLag() {
+    const { headers } = await this.httpService
+      .request({
+        method: 'GET',
+        url: 'http://libzwyy.jlu.edu.cn/ClientWeb/xcus/ic2/Default.aspx',
+      })
+      .toPromise();
+    const targetServerTimeLag = +new Date() - +new Date(headers['date']);
+    const timeLag = new Date(targetServerTimeLag);
+    // 目标服务器时间次日0点0分0秒
+    const reserveCron = `${timeLag.getSeconds() + 0} ${timeLag.getMinutes() + 0} 0 * * *`;
+    const subscribeJob = new CronJob(reserveCron, () => {
+      this.subscribe();
+    });
+    this.schedulerRegistry.addCronJob('subscribe', subscribeJob);
+    subscribeJob.start();
+    console.log(`[${new Date().format()}] TIME_LAG: ${timeLag.getMinutes()}:${timeLag.getSeconds()}`);
+  }
 
   async findMemberList(): Promise<LibReservation[]> {
     return this.libModel
@@ -189,7 +210,10 @@ export class LibReservationService {
   // 秒 分 时 日 月 星期
   // 每日23点59分0秒
   @Cron('0 59 23 * * *')
+  // 启动10秒后执行
+  // @Cron(new Date(Date.now() + 10 * 1000))
   async groupLogin() {
+    this.getTimeLag();
     try {
       this.memberList = await this.findMemberList();
       this.shuffledList = shuffle(this.memberList)
@@ -212,9 +236,8 @@ export class LibReservationService {
     }
   }
 
-  // 次日0点0分0秒
-  @Cron('0 0 0 * * *')
   async subscribe() {
+    console.log(`[${new Date().format()}] SUBSCRIBE_START`);
     try {
       const shuffledList = this.shuffledList;
       Promise.allSettled([
