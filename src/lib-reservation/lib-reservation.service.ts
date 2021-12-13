@@ -35,7 +35,7 @@ export class LibReservationService {
         url: 'http://libzwyy.jlu.edu.cn/ClientWeb/xcus/ic2/Default.aspx',
       })
       .toPromise();
-    const targetServerTimeLag = Math.abs(+new Date() - +new Date(headers['date']));
+    const targetServerTimeLag = Math.max(+new Date() - +new Date(headers['date']), 0);
     const timeLag = new Date(targetServerTimeLag);
     // 目标服务器时间次日0点0分0秒
     const reserveCron = `${timeLag.getSeconds() + 0} ${timeLag.getMinutes() + 0} 0 * * *`;
