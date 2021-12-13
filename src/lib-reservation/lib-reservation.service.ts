@@ -186,7 +186,7 @@ export class LibReservationService {
           params: params,
         })
         .toPromise();
-      if (res.msg === '操作成功!') {
+      if (/操作成功/.test(res.msg)) {
         console.log(`[${new Date().format()}] SUCCESS_RESERVE: `, 'res: ', res);
         return `${from} - ${to}`;
       }
