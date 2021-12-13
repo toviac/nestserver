@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { LibReservation, LibReservationDocument } from './schemas/lib-reservation.schema';
 import * as qs from 'qs';
 import { shuffle } from 'lodash';
-import { CronJob } from 'cron';
+import { CronTime } from 'cron';
 
 @Injectable()
 export class LibReservationService {
@@ -29,22 +29,28 @@ export class LibReservationService {
   ];
 
   async getTimeLag() {
-    const { headers } = await this.httpService
-      .request({
-        method: 'GET',
-        url: 'http://libzwyy.jlu.edu.cn/ClientWeb/xcus/ic2/Default.aspx',
-      })
-      .toPromise();
-    const targetServerTimeLag = Math.max(+new Date() - +new Date(headers['date']), 0);
-    const timeLag = new Date(targetServerTimeLag);
-    // 目标服务器时间次日0点0分0秒
-    const reserveCron = `${timeLag.getSeconds() + 0} ${timeLag.getMinutes() + 0} 0 * * *`;
-    const subscribeJob = new CronJob(reserveCron, () => {
-      this.subscribe();
-    });
-    this.schedulerRegistry.addCronJob('subscribe', subscribeJob);
-    subscribeJob.start();
-    console.log(`[${new Date().format()}] TIME_LAG: ${timeLag.getMinutes()}:${timeLag.getSeconds()}`);
+    try {
+      const { headers } = await this.httpService
+        .request({
+          method: 'GET',
+          url: 'http://libzwyy.jlu.edu.cn/ClientWeb/xcus/ic2/Default.aspx',
+        })
+        .toPromise();
+      const targetServerTimeLag = Math.max(+new Date() - +new Date(headers['date']), 0);
+      const timeLag = new Date(targetServerTimeLag);
+      // 目标服务器时间次日0点0分0秒
+      const reserveCron = `${timeLag.getSeconds() + 0} ${timeLag.getMinutes() + 0} 0 * * *`;
+      const subscribeJob = this.schedulerRegistry.getCronJob('subscribe');
+      subscribeJob.setTime(new CronTime(reserveCron));
+      // const newJob = new CronJob(reserveCron, () => {
+      //   this.subscribe();
+      // });
+      // this.schedulerRegistry.addCronJob('subscribe', newJob);
+      // newJob.start();
+      console.log(`[${new Date().format()}] TIME_LAG: ${timeLag.getMinutes()}:${timeLag.getSeconds()}`);
+    } catch (e) {
+      console.log(`[${new Date().format()}] ERR_TIME_LAG: ${e.message}`);
+    }
   }
 
   async findMemberList(): Promise<LibReservation[]> {
@@ -180,7 +186,7 @@ export class LibReservationService {
           params: params,
         })
         .toPromise();
-      if (res.msg === '操作成功！') {
+      if (res.msg === '操作成功!') {
         console.log(`[${new Date().format()}] SUCCESS_RESERVE: `, 'res: ', res);
         return `${from} - ${to}`;
       }
@@ -212,6 +218,7 @@ export class LibReservationService {
   @Cron('0 59 23 * * *')
   // 启动10秒后执行
   // @Cron(new Date(Date.now() + 10 * 1000))
+  // @Cron('*/30 * * * * *')
   async groupLogin() {
     this.getTimeLag();
     try {
@@ -236,6 +243,7 @@ export class LibReservationService {
     }
   }
 
+  @Cron('0 0 0 * * *', { name: 'subscribe' })
   async subscribe() {
     console.log(`[${new Date().format()}] SUBSCRIBE_START`);
     try {
