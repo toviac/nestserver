@@ -43,6 +43,7 @@ export class LibReservationService {
       // const time = new Date(Date.now() + 10 * 1000);
       const subscribeJob = this.schedulerRegistry.getCronJob('subscribe');
       subscribeJob.setTime(new CronTime(reserveCron));
+      // 需要手动start
       subscribeJob.start();
       console.log(`[${new Date().format()}] CRONJOB_STARTED, NEXT TIME IS: `, subscribeJob.nextDate());
       // const newJob = new CronJob(time, () => {
