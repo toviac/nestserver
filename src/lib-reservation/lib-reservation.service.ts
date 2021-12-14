@@ -40,9 +40,12 @@ export class LibReservationService {
       const timeLag = new Date(targetServerTimeLag);
       // 目标服务器时间次日0点0分0秒
       const reserveCron = `${timeLag.getSeconds() + 0} ${timeLag.getMinutes() + 0} 0 * * *`;
+      // const time = new Date(Date.now() + 10 * 1000);
       const subscribeJob = this.schedulerRegistry.getCronJob('subscribe');
       subscribeJob.setTime(new CronTime(reserveCron));
-      // const newJob = new CronJob(reserveCron, () => {
+      subscribeJob.start();
+      console.log(`[${new Date().format()}] CRONJOB_STARTED, NEXT TIME IS: `, subscribeJob.nextDate());
+      // const newJob = new CronJob(time, () => {
       //   this.subscribe();
       // });
       // this.schedulerRegistry.addCronJob('subscribe', newJob);
@@ -216,9 +219,9 @@ export class LibReservationService {
   // 秒 分 时 日 月 星期
   // 每日23点59分0秒
   @Cron('0 59 23 * * *')
-  // 启动10秒后执行
-  // @Cron(new Date(Date.now() + 10 * 1000))
-  // @Cron('*/30 * * * * *')
+  // 启动0秒后执行
+  // @Cron(new Date(Date.now() + 5 * 1000))
+  // @Cron('*/20 * * * * *')
   async groupLogin() {
     this.getTimeLag();
     try {
