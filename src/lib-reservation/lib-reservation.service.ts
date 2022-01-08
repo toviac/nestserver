@@ -86,7 +86,7 @@ export class LibReservationService {
       act: 'login',
     });
     try {
-      await this.httpService
+      const { data: res } = await this.httpService
         .request({
           method: 'POST',
           url: 'http://libzwyy.jlu.edu.cn/ClientWeb/pro/ajax/login.aspx',
@@ -97,9 +97,12 @@ export class LibReservationService {
           data: formData,
         })
         .toPromise();
+      if (!res.data) {
+        throw new Error(res.msg);
+      }
       console.log(`[${new Date().format()}] SUCCESS_LOGIN: `, id, sessionId);
     } catch (e) {
-      console.log(`[${new Date().format()}] ERR_LOGIN: `, e);
+      console.log(`[${new Date().format()}] ERR_LOGIN: `, e.message);
     }
   }
 
@@ -209,9 +212,9 @@ export class LibReservationService {
 
   // 秒 分 时 日 月 星期
   // 每日23点59分0秒
-  @Cron('0 59 23 * * *')
-  // 启动10秒后执行
-  // @Cron(new Date(Date.now() + 10 * 1000))
+  // @Cron('0 59 23 * * *')
+  // 启动5秒后执行
+  // @Cron(new Date(Date.now() + 5 * 1000))
   async groupLogin() {
     this.getTimeLag();
     try {
@@ -236,6 +239,7 @@ export class LibReservationService {
     }
   }
 
+  // @Cron(new Date(Date.now() + 10 * 1000))
   async subscribe() {
     console.log(`[${new Date().format()}] SUBSCRIBE_START`);
     try {
