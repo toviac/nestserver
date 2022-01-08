@@ -14,6 +14,7 @@ import { CompanyWx, CompanyWxSchema } from './schemas/companywx.schema';
 export class CompanywxModule implements OnModuleInit {
   constructor(private httpService: HttpService) {}
   public onModuleInit() {
+    return;
     this.httpService.axiosRef.interceptors.response.use(
       response => {
         return response;
